@@ -6,5 +6,6 @@
   "requirements": [],
   "dependencies": [],
   "codeowners": ["@MKsys1337"],
-  "iot_class": "local_polling"
+  "iot_class": "local_polling",
+  "config_flow": true
 }
