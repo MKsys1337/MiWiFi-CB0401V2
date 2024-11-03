@@ -47,7 +47,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         FirmwareVersionSensor(client),
         HardwareModelSensor(client),
         MeshSupportSensor(client),
-        Support160MHzSensor(client),
         LanguageSensor(client),
         CountryCodeSensor(client),
         # Sensoren basierend auf wifi_display für jedes WLAN
