@@ -70,16 +70,16 @@ class MiWiFiClient:
         return await self._get_api("xqsystem/init_info")
 
     async def get_wifi_display(self):
-	"""Hole Information zu den WLAN-Einstellungen."""
-	return await self._get_api("xqdtcustom/wifi_display")
+        """Hole Information zu den WLAN-Einstellungen."""
+        return await self._get_api("xqdtcustom/wifi_display")
 
     async def get_newstatus(self):
-	"""Hole Custom-Status Info."""
-	return await self._get_newstatus("xqdtcustom/newstatus")
+        """Hole Custom-Status Info."""
+        return await self._get_newstatus("xqdtcustom/newstatus")
 
     async def get_sim_info(self):
-	"""Hole SIM-Informationen."""
-	return await self._get_sim_info("xqdtcustom/get_sim_info")
+        """Hole SIM-Informationen."""
+        return await self._get_sim_info("xqdtcustom/get_sim_info")
 
     async def get_system_info(self):
         """Hole Systeminformationen."""
