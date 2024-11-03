@@ -60,10 +60,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         WifiBandwidthSensor(client, wifi_index=2),
         WifiChannelSensor(client, wifi_index=2),
         WifiHiddenSensor(client, wifi_index=2),
-        WifiEncryptionSensor(client, wifi_index=1),
-        WifiEncryptionSensor(client, wifi_index=2),
-        WifiTxPowerSensor(client, wifi_index=1),
-        WifiTxPowerSensor(client, wifi_index=2),
 	# Weitere Sensoren können hier hinzugefügt werden
     ]
     async_add_entities(sensors, True)
