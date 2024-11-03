@@ -69,6 +69,18 @@ class MiWiFiClient:
         """Hole Initialisierungsinformationen."""
         return await self._get_api("xqsystem/init_info")
 
+    async def get_wifi_display(self):
+	"""Hole Information zu den WLAN-Einstellungen."""
+	return await self._get_api("xqdtcustom/wifi_display")
+
+    async def get_newstatus(self):
+	"""Hole Custom-Status Info."""
+	return await self._get_newstatus("xqdtcustom/newstatus")
+
+    async def get_sim_info(self):
+	"""Hole SIM-Informationen."""
+	return await self._get_sim_info("xqdtcustom/get_sim_info")
+
     async def get_system_info(self):
         """Hole Systeminformationen."""
         return await self._get_api("xqsystem/system_info")
@@ -84,6 +96,18 @@ class MiWiFiClient:
     async def get_wifi_detail_all(self):
         """Hole alle Details des WLANs."""
         return await self._get_api("xqnetwork/wifi_detail_all")
+
+    async def cpe_detect(self):
+        """Führe eine CPE-Erkennung durch."""
+        return await self._get_api("xqdtcustom/cpe_detect")
+
+    async def get_apn_info(self):
+        """Hole die APN-Informationen."""
+        return await self._get_api("xqmobile/get_apn_info")
+
+    async def get_mobile_net_cfg(self):
+        """Hole die Mobilfunknetz-Konfiguration."""
+        return await self._get_api("xqmobile/get_mobile_net_cfg")
 
     async def _get_api(self, endpoint):
         """Hilfsmethode zum Abrufen von API-Endpunkten."""
