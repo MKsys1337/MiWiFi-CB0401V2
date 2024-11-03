@@ -1,0 +1,12 @@
+{
+  "name": "MiWiFi CB0401V2",
+  "content_in_root": false,
+  "domain": "miwifi_cb0401v2",
+  "iot_class": "local_polling",
+  "render_readme": true,
+  "homeassistant": "2024.10.4",
+  "documentation": "https://github.com/MKsys1337/MiWiFi-CB0401V2",
+  "issue_tracker": "https://github.com/MKsys1337/MiWiFi-CB0401V2/issues",
+  "codeowners": ["@MKsys1337"],
+  "version": "1.0.0"
+}

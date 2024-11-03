@@ -1,0 +1,10 @@
+{
+  "domain": "miwifi_cb0401v2",
+  "name": "MiWiFi CB0401V2",
+  "version": "0.0.1",
+  "documentation": "https://github.com/MKsys1337/MiWiFi-CB0401V2",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@MKsys1337"],
+  "iot_class": "local_polling"
+}
