@@ -5,6 +5,7 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from .const import DOMAIN
+from datetime import timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -329,6 +330,7 @@ class WifiDetailSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi SSID"
+        self._scan_interval = timedelta(minutes=1) 
 
     @property
     def name(self):
@@ -339,6 +341,11 @@ class WifiDetailSensor(BaseMiWiFiSensor):
     def state(self):
         """Return the state of the sensor."""
         return self._state
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     async def async_update(self):
         """Fetch data from the router and update the state."""
@@ -1198,6 +1205,7 @@ class CountryCodeSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Ländercode"
+        self._scan_interval = timedelta(minutes=1)
 
     @property
     def name(self):
@@ -1206,6 +1214,11 @@ class CountryCodeSensor(BaseMiWiFiSensor):
     @property
     def state(self):
         return self._state  # z.B. "DE"
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     async def async_update(self):
         data = await self._client.get_init_info()
@@ -1285,6 +1298,7 @@ class WifiBandwidthSensor(BaseMiWiFiSensor):
         self._wifi_index = wifi_index
         self._name = f"MiWiFi WLAN {wifi_index} Bandbreite"
         self._unit_of_measurement = "MHz"
+        self._scan_interval = timedelta(minutes=1)
 
     @property
     def name(self):
@@ -1297,6 +1311,11 @@ class WifiBandwidthSensor(BaseMiWiFiSensor):
     @property
     def unit_of_measurement(self):
         return self._unit_of_measurement
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     async def async_update(self):
         data = await self._client.get_wifi_display()
@@ -1320,6 +1339,7 @@ class WifiChannelSensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi WLAN {wifi_index} Kanal"
+        self._scan_interval = timedelta(minutes=1)
 
     @property
     def name(self):
@@ -1328,6 +1348,11 @@ class WifiChannelSensor(BaseMiWiFiSensor):
     @property
     def state(self):
         return self._state  # Kanalnummer
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     async def async_update(self):
         data = await self._client.get_wifi_display()
@@ -1351,6 +1376,7 @@ class WifiHiddenSensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi WLAN {wifi_index} Versteckt"
+        self._scan_interval = timedelta(minutes=1)
 
     @property
     def name(self):
@@ -1359,6 +1385,11 @@ class WifiHiddenSensor(BaseMiWiFiSensor):
     @property
     def state(self):
         return self._state  # "Ja" oder "Nein"
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     async def async_update(self):
         data = await self._client.get_wifi_display()
