@@ -60,9 +60,9 @@ class MiWiFiClient:
             return False
 
 
-    async def fetch_mac_address(host, token):
+    async def fetch_mac_address(self):
         """Methode zum Abrufen der MAC-Adresse des Routers."""
-        url = f"https://{host}/cgi-bin/luci/;stok={token}/api/xqdtcustom/newstatus"
+        url = f"https://{self._host}/cgi-bin/luci/;stok={self._token}/api/xqdtcustom/newstatus"
         headers = {
             "Accept": "application/json",
             "User-Agent": "Mozilla/5.0"
