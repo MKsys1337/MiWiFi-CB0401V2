@@ -60,11 +60,12 @@ class MiWiFiClient:
 
     async def fetch_mac_address(self):
         """Methode zum Abrufen der MAC-Adresse des Routers."""
-        # Ersetze '/api/endpoint_for_mac' durch den tatsächlichen API-Endpunkt deines Routers
-        response = await self._session.get(f"http://{self._host}/cgi-bin/luci/api/xqsystem/init_info")
+        response = await self._session.get(f"http://{self._host}/cgi-bin/luci/api/xqdtcustom/newstatus")
         if response.status == 200:
             data = await response.json()
-            self.mac_address = data.get("mac")
+            hardware_info = data.get("hardware")
+            if hardware_info:
+                self.mac_address = hardware_info.get("mac")
 
     async def get_wan_statistics(self):
         """Hole die WAN-Statistiken."""
