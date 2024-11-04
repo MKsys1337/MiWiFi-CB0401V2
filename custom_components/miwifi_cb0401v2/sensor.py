@@ -68,13 +68,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 class BaseMiWiFiSensor(SensorEntity):
     """Base class for all MiWiFi sensors."""
 
-    def __init__(self, client):
+    def __init__(self, client, mac_address):
+        super().__init__()
         self._client = client
         self._state = None
         self._name = None
         self._unit_of_measurement = None
         self._available = False
-        self._mac_adress = mac_adress
+        self._mac_address = mac_address
 
     @property
     def device_info(self):
@@ -105,7 +106,7 @@ class ConnectedDevicesSensor(BaseMiWiFiSensor):
     """Sensor for the number of connected devices."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Verbundene Geräte"
         self._scan_interval = timedelta(minutes=1)
 
@@ -138,7 +139,7 @@ class WanDownloadSpeedSensor(BaseMiWiFiSensor):
     """Sensor for WAN download speed."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi WAN Download Geschwindigkeit"
         self._unit_of_measurement = "KByte/s"
 
@@ -176,7 +177,7 @@ class WanUploadSpeedSensor(BaseMiWiFiSensor):
     """Sensor for WAN upload speed."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi WAN Upload Geschwindigkeit"
         self._unit_of_measurement = "KByte/s"
 
@@ -214,7 +215,7 @@ class WanMaxDownloadSpeedSensor(BaseMiWiFiSensor):
     """Sensor for maximum WAN download speed."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Maximale WAN Download Geschwindigkeit"
         self._unit_of_measurement = "KByte/s"
 
@@ -252,7 +253,7 @@ class WanMaxUploadSpeedSensor(BaseMiWiFiSensor):
     """Sensor for maximum WAN upload speed."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Maximale WAN Upload Geschwindigkeit"
         self._unit_of_measurement = "KByte/s"
 
@@ -290,7 +291,7 @@ class SystemVersionSensor(BaseMiWiFiSensor):
     """Sensor for the system version."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Systemversion"
         self._scan_interval = timedelta(minutes=1)
 
@@ -323,7 +324,7 @@ class WifiStatusSensor(BaseMiWiFiSensor):
     """Sensor for the Wi-Fi status."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi WLAN Status"
         self._scan_interval = timedelta(minutes=1)
 
@@ -358,7 +359,7 @@ class WifiDetailSensor(BaseMiWiFiSensor):
     """Sensor for Wi-Fi details (SSID)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi SSID"
         self._scan_interval = timedelta(minutes=1) 
 
@@ -391,7 +392,7 @@ class LteSignalStrengthSensor(BaseMiWiFiSensor):
     """Sensor für die LTE-Signalstärke (RSRP)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE Signalstärke"
         self._unit_of_measurement = "dBm"
 
@@ -425,7 +426,7 @@ class LteSignalQualitySensor(BaseMiWiFiSensor):
     """Sensor für die LTE-Signalqualität (RSRQ)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE Signalqualität"
         self._unit_of_measurement = "dB"
 
@@ -459,7 +460,7 @@ class LteNetworkTypeSensor(BaseMiWiFiSensor):
     """Sensor für den LTE Netzwerktyp."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE Netzwerktyp"
         self._scan_interval = timedelta(minutes=1)
 
@@ -494,7 +495,7 @@ class LteOperatorSensor(BaseMiWiFiSensor):
     """Sensor für den LTE Netzbetreiber."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE Netzbetreiber"
         self._scan_interval = timedelta(minutes=1)
 
@@ -529,7 +530,7 @@ class LteDataUsageSensor(BaseMiWiFiSensor):
     """Sensor für die verbrauchte Datenmenge."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE Datenverbrauch"
         self._unit_of_measurement = "MB"
         self._scan_interval = timedelta(minutes=1)
@@ -569,7 +570,7 @@ class LteCellBandSensor(BaseMiWiFiSensor):
     """Sensor für das LTE Empfangsband."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE Empfangsband"
 
     @property
@@ -598,7 +599,7 @@ class Lte5GSignalStrengthSensor(BaseMiWiFiSensor):
     """Sensor für die 5G Signalstärke (RSRP 5G)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi 5G Signalstärke"
         self._unit_of_measurement = "dBm"
 
@@ -632,7 +633,7 @@ class Lte5GSignalQualitySensor(BaseMiWiFiSensor):
     """Sensor für die 5G Signalqualität (RSRQ 5G)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi 5G Signalqualität"
         self._unit_of_measurement = "dB"
 
@@ -666,7 +667,7 @@ class Lte5GCellBandSensor(BaseMiWiFiSensor):
     """Sensor für das 5G Empfangsband."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi 5G Empfangsband"
 
     @property
@@ -695,7 +696,7 @@ class LteFrequencyBandsSensor(BaseMiWiFiSensor):
     """Sensor für die genutzten Frequenzbänder."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE Frequenzbänder"
 
     @property
@@ -724,7 +725,7 @@ class LteDownlinkBandwidthSensor(BaseMiWiFiSensor):
     """Sensor für die Downlink-Bandbreite."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Downlink Bandbreite"
         self._unit_of_measurement = "MHz"
         self._scan_interval = timedelta(minutes=1)
@@ -764,7 +765,7 @@ class LteUplinkBandwidthSensor(BaseMiWiFiSensor):
     """Sensor für die Uplink-Bandbreite."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Uplink Bandbreite"
         self._unit_of_measurement = "MHz"
         self._scan_interval = timedelta(minutes=1)
@@ -804,7 +805,7 @@ class LteArfcnSensor(BaseMiWiFiSensor):
     """Sensor für die ARFCN (Absolute Radio Frequency Channel Number)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE ARFCN"
 
     @property
@@ -833,7 +834,7 @@ class LtePciSensor(BaseMiWiFiSensor):
     """Sensor für die Physical Cell ID (PCI)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE PCI"
 
     @property
@@ -862,7 +863,7 @@ class Lte5GPciSensor(BaseMiWiFiSensor):
     """Sensor für die 5G Physical Cell ID (PCI 5G)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi 5G PCI"
 
     @property
@@ -891,7 +892,7 @@ class LteCiSensor(BaseMiWiFiSensor):
     """Sensor für die Cell ID (CI)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi LTE CI"
 
     @property
@@ -920,7 +921,7 @@ class Lte5GCiSensor(BaseMiWiFiSensor):
     """Sensor für die 5G Cell ID (CI 5G)."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi 5G CI"
 
     @property
@@ -951,7 +952,7 @@ class SimStatusSensor(BaseMiWiFiSensor):
     """Sensor für den SIM-Kartenstatus."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi SIM-Kartenstatus"
         self._scan_interval = timedelta(minutes=1)
 
@@ -982,7 +983,7 @@ class SimPinRetrySensor(BaseMiWiFiSensor):
     """Sensor für verbleibende PIN-Eingabeversuche."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi SIM PIN-Versuche"
         self._unit_of_measurement = "Versuche"
         self._scan_interval = timedelta(minutes=1)
@@ -1017,7 +1018,7 @@ class SimPukRetrySensor(BaseMiWiFiSensor):
     """Sensor für verbleibende PUK-Eingabeversuche."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi SIM PUK-Versuche"
         self._unit_of_measurement = "Versuche"
         self._scan_interval = timedelta(minutes=1)
@@ -1054,7 +1055,7 @@ class MobileDataEnabledSensor(BaseMiWiFiSensor):
     """Sensor, ob mobile Daten aktiviert sind."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Mobile Daten"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1084,7 +1085,7 @@ class NetworkRoamingEnabledSensor(BaseMiWiFiSensor):
     """Sensor, ob Roaming aktiviert ist."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Roaming"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1114,7 +1115,7 @@ class NetworkTypeSettingSensor(BaseMiWiFiSensor):
     """Sensor für die Netzwerkeinstellung (z.B. "auto")."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Netzwerktypeinstellung"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1146,7 +1147,7 @@ class CurrentApnSensor(BaseMiWiFiSensor):
     """Sensor für den aktuellen APN."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Aktueller APN"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1183,7 +1184,7 @@ class RouterNameSensor(BaseMiWiFiSensor):
     """Sensor für den Namen des Routers."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Routername"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1213,7 +1214,7 @@ class FirmwareVersionSensor(BaseMiWiFiSensor):
     """Sensor für die Firmware-Version des Routers."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Firmware-Version"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1244,7 +1245,7 @@ class HardwareModelSensor(BaseMiWiFiSensor):
     """Sensor für das Hardware-Modell des Routers."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Hardware-Modell"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1274,7 +1275,7 @@ class MeshSupportSensor(BaseMiWiFiSensor):
     """Sensor, ob der Router Mesh unterstützt."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Mesh-Unterstützung"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1304,7 +1305,7 @@ class LanguageSensor(BaseMiWiFiSensor):
     """Sensor für die Sprache des Routers."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Sprache"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1335,7 +1336,7 @@ class CountryCodeSensor(BaseMiWiFiSensor):
     """Sensor für den Ländercode des Routers."""
 
     def __init__(self, client):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._name = "MiWiFi Ländercode"
         self._scan_interval = timedelta(minutes=1)
 
@@ -1365,7 +1366,7 @@ class WifiSsidSensor(BaseMiWiFiSensor):
     """Sensor für die SSID des WLANs."""
 
     def __init__(self, client, wifi_index):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi SSID WLAN {wifi_index}"
         self._scan_interval = timedelta(minutes=1)
@@ -1401,7 +1402,7 @@ class WifiStatusSensor(BaseMiWiFiSensor):
     """Sensor für den Status des WLANs (An/Aus)."""
 
     def __init__(self, client, wifi_index):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi WLAN {wifi_index} Status"
         self._scan_interval = timedelta(minutes=1)
@@ -1438,7 +1439,7 @@ class WifiBandwidthSensor(BaseMiWiFiSensor):
     """Sensor für die Bandbreite des WLANs."""
 
     def __init__(self, client, wifi_index):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi WLAN {wifi_index} Bandbreite"
         self._unit_of_measurement = "MHz"
@@ -1480,7 +1481,7 @@ class WifiChannelSensor(BaseMiWiFiSensor):
     """Sensor für den Kanal des WLANs."""
 
     def __init__(self, client, wifi_index):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi WLAN {wifi_index} Kanal"
         self._scan_interval = timedelta(minutes=1)
@@ -1517,7 +1518,7 @@ class WifiHiddenSensor(BaseMiWiFiSensor):
     """Sensor, ob das WLAN versteckt ist."""
 
     def __init__(self, client, wifi_index):
-        super().__init__(client)
+        super().__init__(client, client.mac_address)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi WLAN {wifi_index} Versteckt"
         self._scan_interval = timedelta(minutes=1)

@@ -28,7 +28,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         _LOGGER.error("Login fehlgeschlagen. Bitte überprüfe die Anmeldedaten.")
         return False
 
-    hass.data[DOMAIN][entry.entry_id] = client
+    # Prüfen, ob die MAC-Adresse im Client verfügbar ist
+    if not client.mac_address:
+        _LOGGER.error("MAC address not found. Device will not be properly registered.")
+        return False
 
     # Gerät im Geräte-Register erstellen
     device_registry = dr.async_get(hass)
@@ -40,6 +43,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         model="CB0401V2",
         sw_version="3.0.59"  # Beispielversion, kann angepasst werden
     )
+
+    hass.data[DOMAIN][entry.entry_id] = client
 
     # Sensoren einrichten
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
