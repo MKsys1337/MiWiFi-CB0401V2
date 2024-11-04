@@ -9,6 +9,7 @@ class MiWiFiClient:
         self._password = password
         self._session = session
         self._token = None
+        self.mac_address = None
 
     async def login(self):
         """Authentifiziere dich beim Router und erhalte einen Token."""
