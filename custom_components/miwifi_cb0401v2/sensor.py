@@ -95,6 +95,12 @@ class ConnectedDevicesSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Verbundene Geräte"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -274,6 +280,12 @@ class SystemVersionSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Systemversion"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -301,6 +313,12 @@ class WifiStatusSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi WLAN Status"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -431,6 +449,12 @@ class LteNetworkTypeSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi LTE Netzwerktyp"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -460,6 +484,12 @@ class LteOperatorSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi LTE Netzbetreiber"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -490,6 +520,12 @@ class LteDataUsageSensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._name = "MiWiFi LTE Datenverbrauch"
         self._unit_of_measurement = "MB"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -679,6 +715,12 @@ class LteDownlinkBandwidthSensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._name = "MiWiFi Downlink Bandbreite"
         self._unit_of_measurement = "MHz"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -713,6 +755,12 @@ class LteUplinkBandwidthSensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._name = "MiWiFi Uplink Bandbreite"
         self._unit_of_measurement = "MHz"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -893,6 +941,12 @@ class SimStatusSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi SIM-Kartenstatus"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -919,6 +973,12 @@ class SimPinRetrySensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._name = "MiWiFi SIM PIN-Versuche"
         self._unit_of_measurement = "Versuche"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -948,6 +1008,12 @@ class SimPukRetrySensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._name = "MiWiFi SIM PUK-Versuche"
         self._unit_of_measurement = "Versuche"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -978,6 +1044,12 @@ class MobileDataEnabledSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Mobile Daten"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1002,6 +1074,12 @@ class NetworkRoamingEnabledSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Roaming"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1026,6 +1104,12 @@ class NetworkTypeSettingSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Netzwerktypeinstellung"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1052,6 +1136,12 @@ class CurrentApnSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Aktueller APN"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1083,6 +1173,12 @@ class RouterNameSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Routername"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1107,6 +1203,12 @@ class FirmwareVersionSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Firmware-Version"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1132,6 +1234,12 @@ class HardwareModelSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Hardware-Modell"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1156,6 +1264,12 @@ class MeshSupportSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Mesh-Unterstützung"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1180,6 +1294,12 @@ class LanguageSensor(BaseMiWiFiSensor):
     def __init__(self, client):
         super().__init__(client)
         self._name = "MiWiFi Sprache"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1236,6 +1356,12 @@ class WifiSsidSensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi SSID WLAN {wifi_index}"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1266,6 +1392,12 @@ class WifiStatusSensor(BaseMiWiFiSensor):
         super().__init__(client)
         self._wifi_index = wifi_index
         self._name = f"MiWiFi WLAN {wifi_index} Status"
+        self._scan_interval = timedelta(minutes=1)
+
+    @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
 
     @property
     def name(self):
@@ -1379,17 +1511,17 @@ class WifiHiddenSensor(BaseMiWiFiSensor):
         self._scan_interval = timedelta(minutes=1)
 
     @property
+    def scan_interval(self):
+        """Return the scan interval for this sensor."""
+        return self._scan_interval
+
+    @property
     def name(self):
         return self._name
 
     @property
     def state(self):
         return self._state  # "Ja" oder "Nein"
-
-    @property
-    def scan_interval(self):
-        """Return the scan interval for this sensor."""
-        return self._scan_interval
 
     async def async_update(self):
         data = await self._client.get_wifi_display()
