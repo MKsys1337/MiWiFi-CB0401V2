@@ -46,6 +46,7 @@ class MiWiFiClient:
                     if result.get("token"):
                         self._token = result.get("token")
                         print(f"Erhaltener Token: {self._token}")
+                        await self.fetch_mac_address()
                         return True
                     else:
                         print(f"Login fehlgeschlagen: {result.get('msg')}")
@@ -56,6 +57,14 @@ class MiWiFiClient:
         except Exception as e:
             print(f"Unerwarteter Fehler beim Login: {e}")
             return False
+
+    async def fetch_mac_address(self):
+        """Methode zum Abrufen der MAC-Adresse des Routers."""
+        # Ersetze '/api/endpoint_for_mac' durch den tatsächlichen API-Endpunkt deines Routers
+        response = await self._session.get(f"http://{self._host}/cgi-bin/luci/api/xqsystem/init_info")
+        if response.status == 200:
+            data = await response.json()
+            self.mac_address = data.get("mac")
 
     async def get_wan_statistics(self):
         """Hole die WAN-Statistiken."""
