@@ -8,5 +8,5 @@
   "codeowners": ["@MKsys1337"],
   "iot_class": "local_polling",
   "config_flow": true,
-  "icon": "custom_components/miwifi_cb0401v2/icon.png"
+  "issue_tracker": "https://github.com/MKsys1337/MiWiFi-CB0401V2/issues"
 }
