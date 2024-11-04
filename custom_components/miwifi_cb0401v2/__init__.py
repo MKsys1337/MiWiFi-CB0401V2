@@ -28,20 +28,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         _LOGGER.error("Login fehlgeschlagen. Bitte überprüfe die Anmeldedaten.")
         return False
 
-    # Prüfen, ob die MAC-Adresse im Client verfügbar ist
-    if not client.mac_address:
+    # Abrufen der MAC-Adresse nach erfolgreichem Login
+    mac_address = await client.fetch_mac_address()
+    if not mac_address:
         _LOGGER.error("MAC address not found. Device will not be properly registered.")
         return False
 
-    # Gerät im Geräte-Register erstellen
+    # Gerät im Geräteregister anlegen
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
-        identifiers={(DOMAIN, client.mac_address)},  # Die MAC-Adresse als eindeutiger Bezeichner
+        identifiers={(DOMAIN, mac_address)},
         manufacturer="Xiaomi",
         name=f"Xiaomi Router {entry.data['host']}",
         model="CB0401V2",
-        sw_version="3.0.59"  # Beispielversion, kann angepasst werden
+        sw_version="3.0.6"  # Beispiel: Passe die Software-Version an, wenn nötig
     )
 
     hass.data[DOMAIN][entry.entry_id] = client
