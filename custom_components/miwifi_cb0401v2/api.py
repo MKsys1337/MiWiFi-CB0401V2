@@ -60,39 +60,49 @@ class MiWiFiClient:
             return False
 
 
-    async def fetch_mac_address(self):
+    async def fetch_mac_address(host, token):
         """Methode zum Abrufen der MAC-Adresse des Routers."""
-        url = f"https://{self._host}/cgi-bin/luci/;stok={self._token}/api/xqdtcustom/newstatus"
+        url = f"https://{host}/cgi-bin/luci/;stok={token}/api/xqdtcustom/newstatus"
         headers = {
             "Accept": "application/json",
             "User-Agent": "Mozilla/5.0"
         }
-
-      #  ssl_context = ssl.create_default_context()
-      #  ssl_context.check_hostname = False
-      #  ssl_context.verify_mode = ssl.CERT_NONE
-
-        try:
-            async with self._session.get(url, headers=headers, ssl=False) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    print(f"API-Antwort: {data}")  # Zeigt die vollständige Antwort für Debugging-Zwecke
-
-                    hardware_info = data.get("hardware")
-                    if hardware_info:
-                        self.mac_address = hardware_info.get("mac")
-                        if self.mac_address:
-                            print(f"MAC-Adresse erfolgreich abgerufen: {self.mac_address}")
-                        else:
-                            print("MAC-Adresse konnte nicht im Antwort-JSON gefunden werden.")
+    
+        # SSL-Verifizierung deaktiviert (nur in vertrauenswürdigen Netzwerken verwenden)
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+    
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers, ssl=ssl_context) as response:
+                    if response.status == 200:
+                        # Antwort als Text erhalten und manuell als JSON parsen
+                        text = await response.text()
+                        try:
+                            data = json.loads(text)  # Manuelles Parsen der JSON-Antwort
+                            print(f"Vollständige API-Antwort: {data}")
+    
+                            hardware_info = data.get("hardware")
+                            if hardware_info:
+                                mac_address = hardware_info.get("mac")
+                                if mac_address:
+                                    print(f"MAC-Adresse erfolgreich abgerufen: {mac_address}")
+                                    return mac_address
+                                else:
+                                    print("MAC-Adresse konnte nicht im Antwort-JSON gefunden werden.")
+                            else:
+                                print("Hardware-Informationen konnten im Antwort-JSON nicht gefunden werden.")
+                        except json.JSONDecodeError as e:
+                            print(f"Fehler beim Parsen der JSON-Antwort: {e}")
+                            print(f"Unerwartete Antwort: {text}")
+                            return None
                     else:
-                        print("Hardware-Informationen konnten im Antwort-JSON nicht gefunden werden.")
-                else:
-                    print(f"Fehler beim Abrufen der MAC-Adresse. Statuscode: {response.status}")
-        except Exception as e:
-            print(f"Unerwarteter Fehler beim Abrufen der MAC-Adresse: {e}")
-
-
+                        print(f"Fehler beim Abrufen der MAC-Adresse. Statuscode: {response.status}")
+                        return None
+            except Exception as e:
+                print(f"Unerwarteter Fehler beim Abrufen der MAC-Adresse: {e}")
+                return None
 
     async def get_wan_statistics(self):
         """Hole die WAN-Statistiken."""
