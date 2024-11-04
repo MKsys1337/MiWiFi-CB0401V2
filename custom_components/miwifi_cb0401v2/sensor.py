@@ -82,7 +82,7 @@ class BaseMiWiFiSensor(SensorEntity):
         """Return device information to associate this entity with a device."""
         return {
             "identifiers": {(DOMAIN, self._mac_address)},
-            "name": f"Xiaomi Router {self._mac_address}",
+            "name": f"Xiaomi Router {self._client.host}",
             "manufacturer": "Xiaomi",
             "model": "CB0401V2",
             "sw_version": "3.0.59"  # Beispielversion
