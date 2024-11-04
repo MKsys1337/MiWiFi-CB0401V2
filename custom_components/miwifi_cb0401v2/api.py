@@ -46,7 +46,7 @@ class MiWiFiClient:
                     if result.get("token"):
                         self._token = result.get("token")
                         print(f"Erhaltener Token: {self._token}")
-                    #    await self.fetch_mac_address()
+                        await self.fetch_mac_address()
                         return True
                     else:
                         print(f"Login fehlgeschlagen: {result.get('msg')}")
@@ -60,12 +60,31 @@ class MiWiFiClient:
 
     async def fetch_mac_address(self):
         """Methode zum Abrufen der MAC-Adresse des Routers."""
-        response = await self._session.get(f"http://{self._host}/cgi-bin/luci/api/xqdtcustom/newstatus")
-        if response.status == 200:
-            data = await response.json()
-            hardware_info = data.get("hardware")
-            if hardware_info:
-                self.mac_address = hardware_info.get("mac")
+        url = f"https://{self._host}/cgi-bin/luci/api/xqdtcustom/newstatus"
+        headers = {
+            "Authorization": f"Bearer {self._token}",
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+        try:
+            async with self._session.get(url, headers=headers, ssl=ssl_context) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    hardware_info = data.get("hardware")
+                    if hardware_info:
+                        self.mac_address = hardware_info.get("mac")
+                        print(f"MAC-Adresse abgerufen: {self.mac_address}")
+                    else:
+                        print("MAC-Adresse konnte nicht in der Antwort gefunden werden.")
+                else:
+                    print(f"Fehler beim Abrufen der MAC-Adresse. Statuscode: {response.status}")
+        except Exception as e:
+            print(f"Unerwarteter Fehler beim Abrufen der MAC-Adresse: {e}")
 
     async def get_wan_statistics(self):
         """Hole die WAN-Statistiken."""
