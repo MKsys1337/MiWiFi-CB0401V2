@@ -46,7 +46,7 @@ class MiWiFiClient:
                     if result.get("token"):
                         self._token = result.get("token")
                         print(f"Erhaltener Token: {self._token}")
-                        await self.fetch_mac_address()
+                    #    await self.fetch_mac_address()
                         return True
                     else:
                         print(f"Login fehlgeschlagen: {result.get('msg')}")
