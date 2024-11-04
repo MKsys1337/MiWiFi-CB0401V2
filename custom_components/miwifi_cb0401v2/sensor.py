@@ -74,6 +74,18 @@ class BaseMiWiFiSensor(SensorEntity):
         self._name = None
         self._unit_of_measurement = None
         self._available = False
+        self._mac_adress = mac_adress
+
+    @property
+    def device_info(self):
+        """Return device information to associate this entity with a device."""
+        return {
+            "identifiers": {(DOMAIN, self._mac_address)},
+            "name": f"Xiaomi Router {self._mac_address}",
+            "manufacturer": "Xiaomi",
+            "model": "CB0401V2",
+            "sw_version": "3.0.59"  # Beispielversion
+        }
 
     @property
     def available(self):

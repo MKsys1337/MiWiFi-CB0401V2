@@ -1,11 +1,12 @@
 {
   "domain": "miwifi_cb0401v2",
   "name": "MiWiFi CB0401V2",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "documentation": "https://github.com/MKsys1337/MiWiFi-CB0401V2",
   "requirements": [],
   "dependencies": [],
   "codeowners": ["@MKsys1337"],
   "iot_class": "local_polling",
   "config_flow": true
+  "icon": "custom_components/miwifi_cb0401v2/icon.png"
 }
