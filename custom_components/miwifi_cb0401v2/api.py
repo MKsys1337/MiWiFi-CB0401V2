@@ -168,12 +168,10 @@ class MiWiFiClient:
         }
 
         # SSL-Kontext erstellen und SSL-Verifizierung deaktivieren (Sicherheitsrisiko, nur in vertrauenswürdigen Netzwerken verwenden)
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
+        ssl_context = False
 
         try:
-            async with self._session.get(url, headers=headers, ssl=ssl_context) as response:
+            async with self._session.get(url, headers=headers, ssl=False) as response:
                 text = await response.text()
                 if response.status == 200:
                     # Versuche, die Antwort als JSON zu parsen
