@@ -69,13 +69,11 @@ class MiWiFiClient:
         }
     
         # SSL-Verifizierung deaktiviert (nur in vertrauenswürdigen Netzwerken verwenden)
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-    
+        ssl_context = False
+        
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.get(url, headers=headers, ssl=ssl_context) as response:
+                async with session.get(url, headers=headers, ssl=False) as response:
                     if response.status == 200:
                         # Antwort als Text erhalten und manuell als JSON parsen
                         text = await response.text()
