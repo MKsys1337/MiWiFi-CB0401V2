@@ -90,8 +90,6 @@ This integration uses a **Config Flow**, so no manual `configuration.yaml` chang
 - **Network Operator**
 - **Data Usage**
 - **LTE Reception Band**
-- **5G Signal Strength**
-- **5G Signal Quality**
 - **5G Reception Band**
 - **Frequency Bands**
 - **Cell ID**
@@ -172,7 +170,6 @@ Ensure your code follows PEP 8 guidelines and passes existing tests.
 
 - **Confidentiality of credentials**: Never share your credentials publicly.
 - **SSL Verification**: This integration disables SSL verification to facilitate communication with the router. Use it only in trusted and secure networks.
-- **Sensitive Information**: Avoid displaying sensitive data like IMEI, phone numbers, or IMSI in Home Assistant.
 
 ## License
 
