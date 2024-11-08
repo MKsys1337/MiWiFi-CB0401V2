@@ -14,3 +14,8 @@ async def test_sensor_update(sensor):
     await sensor.async_update()
     assert sensor.state == "B3"
     assert sensor.available
+    assert sensor.name == "Cell Band Sensor"
+    assert sensor.unique_id == "net.info.cell_band"
+    sensor._client.cpe_detect = AsyncMock(side_effect=ConnectionError)
+    await sensor.async_update()
+    assert not sensor.available
