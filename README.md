@@ -169,7 +169,6 @@ Ensure your code follows PEP 8 guidelines and passes existing tests.
 ## Security
 
 - **Confidentiality of credentials**: Never share your credentials publicly.
-- **SSL Verification**: This integration disables SSL verification to facilitate communication with the router. Use it only in trusted and secure networks.
 
 ## License
 
