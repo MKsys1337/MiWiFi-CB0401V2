@@ -1,6 +1,7 @@
 import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import MiWiFiClient
 from .const import DOMAIN
 
@@ -12,7 +13,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         host=entry.data["host"],
         username=entry.data["username"],
         password=entry.data["password"],
-        session=hass.helpers.aiohttp_client.async_get_clientsession()
+        session=async_get_clientsession(hass)
     )
     await client.login()  # Log in and fetch token
 
@@ -23,9 +24,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = client
 
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, "sensor")
-    )
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
