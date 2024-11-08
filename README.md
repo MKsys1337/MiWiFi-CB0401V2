@@ -11,10 +11,6 @@ The **Xiaomi 5G CPE CB0401V2 Integration** for Home Assistant allows users to mo
 - **Signal Strength and Quality**: Monitor LTE and 5G signal strength (RSRP) and quality (RSRQ).
 - **Network Information**: View the current network type, operator, reception band, and more.
 - **Data Usage**: Track data usage in MB.
-- **SIM Card Status**: Check SIM card status, remaining PIN/PUK attempts.
-- **Wi-Fi Monitoring**: Display SSID, status, bandwidth, channel, encryption type, and transmission power for 2.4GHz and 5GHz networks.
-- **Router Details**: Firmware version, hardware model, supported features like mesh and 160MHz bandwidth.
-- **APN Information**: Current APN and available APN list.
 
 ## Installation
 
@@ -81,48 +77,25 @@ This integration uses a **Config Flow**, so no manual `configuration.yaml` chang
 - **Firmware Version**
 - **Hardware Model**
 - **Model Designation**
-- **Mesh Support**
-- **160MHz Support**
-- **Language**
-- **Country Code**
-
-### SIM Card Information
-
-- **SIM Card Status**
-- **Remaining PIN Attempts**
-- **Remaining PUK Attempts**
 
 ### Network Information
 
 - **LTE Signal Strength (RSRP)**
 - **LTE Signal Quality (RSRQ)**
+- **5G Signal Strength (RSRP)**
+- **5G Signal Quality (RSRQ)**
+- **LTE Signal SNR**
+- **5G Signal SNR**
 - **Network Type**
 - **Network Operator**
 - **Data Usage**
-- **Reception Band**
+- **LTE Reception Band**
 - **5G Signal Strength**
 - **5G Signal Quality**
 - **5G Reception Band**
 - **Frequency Bands**
-- **Downlink Bandwidth**
-- **Uplink Bandwidth**
-- **ARFCN (Absolute Radio Frequency Channel Number)**
-- **PCI (Physical Cell ID)**
-- **5G PCI**
 - **Cell ID**
 - **5G Cell ID**
-
-### Wi-Fi Information
-
-For each Wi-Fi band (e.g., 2.4GHz and 5GHz):
-
-- **SSID**
-- **Status (On/Off)**
-- **Bandwidth**
-- **Channel**
-- **Hidden (Yes/No)**
-- **Encryption Type**
-- **Transmission Power**
 
 ## Usage
 
