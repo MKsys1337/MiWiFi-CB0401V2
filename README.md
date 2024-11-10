@@ -102,7 +102,7 @@ This integration uses a **Config Flow**, so no manual `configuration.yaml` chang
 - **5G Cell ID**
 - **WiFi SSID 2.4 GHz**
 - **WiFi SSID 5 GHz**
-- **WiFi Active Clients**
+ **WiFi Active Clients** - Number of devices currently connected and exchanging data with the WiFi network
 
 ## Usage
 
