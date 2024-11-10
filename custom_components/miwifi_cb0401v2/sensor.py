@@ -11,79 +11,101 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 class DataCache:
-    """Cache for data from cpe_detect."""
+    """Cache for data from different API endpoints."""
 
     def __init__(self, client, refresh_interval=timedelta(minutes=1)):
         self._client = client
         self._refresh_interval = refresh_interval
-        self._data = None
+        self._cpe_data = None
+        self._newstatus_data = None
         self._last_update = None
         self._lock = asyncio.Lock()
 
-    async def get_data(self):
-        """Get cached data or update if needed."""
+    async def get_data(self, endpoint):
+        """Get cached data for a specified endpoint or update if needed."""
         async with self._lock:
             now = datetime.now()
-            if not self._data or not self._last_update or now - self._last_update > self._refresh_interval:
-                self._data = await self._client.cpe_detect()
-                self._last_update = now
-                _LOGGER.debug(f"Data from cpe_detect updated: {self._data}")
-            else:
-                _LOGGER.debug("Using cached data from cpe_detect")
-            return self._data
+            if endpoint == "cpe_detect":
+                if not self._cpe_data or not self._last_update or now - self._last_update > self._refresh_interval:
+                    self._cpe_data = await self._client.cpe_detect()
+                    self._last_update = now
+                    _LOGGER.debug(f"Data from cpe_detect updated: {self._cpe_data}")
+                else:
+                    _LOGGER.debug("Using cached data from cpe_detect")
+                return self._cpe_data
+            elif endpoint == "newstatus":
+                if not self._newstatus_data or not self._last_update or now - self._last_update > self._refresh_interval:
+                    self._newstatus_data = await self._client.newstatus()
+                    self._last_update = now
+                    _LOGGER.debug(f"Data from newstatus updated: {self._newstatus_data}")
+                else:
+                    _LOGGER.debug("Using cached data from newstatus")
+                return self._newstatus_data
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     """Set up MiWiFi sensors based on a config entry."""
     client = hass.data[DOMAIN][entry.entry_id]
     data_cache = DataCache(client)
 
-    # Add both general and specific sensors
-    sensors = create_general_sensors(client, data_cache) + create_specific_sensors(client, data_cache)
+    # Define sensors with different endpoints
+    sensors = (
+        create_general_sensors(client, data_cache) +
+        create_specific_sensors(client, data_cache) +
+        create_newstatus_sensors(client, data_cache)
+    )
     async_add_entities(sensors, True)
 
 def create_general_sensors(client, data_cache):
-    """Define the list of general sensors."""
+    """Define the list of general sensors from the cpe_detect endpoint."""
     return [
-        BaseMiWiFiSensor(client, data_cache, "net.info.cell_band", "Cell Band", icon="mdi:satellite"),
-        BaseMiWiFiSensor(client, data_cache, "net.info.cell_band_5g", "Cell Band 5G", icon="mdi:satellite-variant"),
-        BaseMiWiFiSensor(client, data_cache, "net.info.ci", "Cell ID", icon="mdi:map-marker"),
-        BaseMiWiFiSensor(client, data_cache, "net.info.datausage", "Data Usage", native_unit=UnitOfInformation.MEGABYTES, device_class=SensorDeviceClass.DATA_SIZE, icon="mdi:database", state_class=SensorStateClass.TOTAL),
-        BaseMiWiFiSensor(client, data_cache, "net.info.linktype", "Link Type", icon="mdi:network"),
-        BaseMiWiFiSensor(client, data_cache, "net.info.operator", "Operator", icon="mdi:cellphone"),
-        BaseMiWiFiSensor(client, data_cache, "net.info.freqband", "Frequency Band", icon="mdi:signal"),
-        BaseMiWiFiSensor(client, data_cache, "net.info.rsrp", "RSRP", native_unit=SIGNAL_STRENGTH_DECIBELS, device_class=SensorDeviceClass.SIGNAL_STRENGTH, icon="mdi:signal", state_class=SensorStateClass.MEASUREMENT),
-        BaseMiWiFiSensor(client, data_cache, "net.info.rsrp_5g", "RSRP 5G", native_unit=SIGNAL_STRENGTH_DECIBELS, device_class=SensorDeviceClass.SIGNAL_STRENGTH, icon="mdi:signal-variant", state_class=SensorStateClass.MEASUREMENT),
-        BaseMiWiFiSensor(client, data_cache, "net.info.rsrq", "RSRQ", native_unit=SIGNAL_STRENGTH_DECIBELS, device_class=SensorDeviceClass.SIGNAL_STRENGTH, icon="mdi:signal", state_class=SensorStateClass.MEASUREMENT),
-        BaseMiWiFiSensor(client, data_cache, "net.info.rsrq_5g", "RSRQ 5G", native_unit=SIGNAL_STRENGTH_DECIBELS, device_class=SensorDeviceClass.SIGNAL_STRENGTH, icon="mdi:signal-variant", state_class=SensorStateClass.MEASUREMENT),
-        BaseMiWiFiSensor(client, data_cache, "net.info.snr", "SNR", native_unit=SIGNAL_STRENGTH_DECIBELS, icon="mdi:signal", state_class=SensorStateClass.MEASUREMENT),
-        BaseMiWiFiSensor(client, data_cache, "net.info.snr_5g", "SNR 5G", native_unit=SIGNAL_STRENGTH_DECIBELS, icon="mdi:signal-variant", state_class=SensorStateClass.MEASUREMENT),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.cell_band", "Cell Band", icon="mdi:satellite"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.cell_band_5g", "Cell Band 5G", icon="mdi:satellite-variant"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.ci", "Cell ID", icon="mdi:map-marker"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.datausage", "Data Usage", native_unit=UnitOfInformation.MEGABYTES, device_class=SensorDeviceClass.DATA_SIZE, icon="mdi:database", state_class=SensorStateClass.TOTAL),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.linktype", "Link Type", icon="mdi:network"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.operator", "Operator", icon="mdi:cellphone"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.freqband", "Frequency Band", icon="mdi:signal"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.rsrp", "RSRP", native_unit=SIGNAL_STRENGTH_DECIBELS, device_class=SensorDeviceClass.SIGNAL_STRENGTH, icon="mdi:signal", state_class=SensorStateClass.MEASUREMENT),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.rsrp_5g", "RSRP 5G", native_unit=SIGNAL_STRENGTH_DECIBELS, device_class=SensorDeviceClass.SIGNAL_STRENGTH, icon="mdi:signal-variant", state_class=SensorStateClass.MEASUREMENT),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.rsrq", "RSRQ", native_unit=SIGNAL_STRENGTH_DECIBELS, device_class=SensorDeviceClass.SIGNAL_STRENGTH, icon="mdi:signal", state_class=SensorStateClass.MEASUREMENT),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.rsrq_5g", "RSRQ 5G", native_unit=SIGNAL_STRENGTH_DECIBELS, device_class=SensorDeviceClass.SIGNAL_STRENGTH, icon="mdi:signal-variant", state_class=SensorStateClass.MEASUREMENT),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.snr", "SNR", native_unit=SIGNAL_STRENGTH_DECIBELS, icon="mdi:signal", state_class=SensorStateClass.MEASUREMENT),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.info.snr_5g", "SNR 5G", native_unit=SIGNAL_STRENGTH_DECIBELS, icon="mdi:signal-variant", state_class=SensorStateClass.MEASUREMENT),
     ]
 
 def create_specific_sensors(client, data_cache):
-    """Define additional specific sensors for IP, mask, and DNS entries."""
+    """Define additional specific sensors for IP, mask, and DNS entries from the cpe_detect endpoint."""
     return [
-        # IPv4 Address and Mask
-        BaseMiWiFiSensor(client, data_cache, "net.ipv4info.ipv4", "IPv4 Address", data_path="ip", icon="mdi:ip"),
-        BaseMiWiFiSensor(client, data_cache, "net.ipv4info.ipv4", "IPv4 Netmask", data_path="mask", icon="mdi:ip"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.ipv4info.ipv4", "IPv4 Address", data_path="ip", icon="mdi:ip"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.ipv4info.ipv4", "IPv4 Netmask", data_path="mask", icon="mdi:ip"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.ipv4info.dns", "IPv4 DNS 1", data_path=0, icon="mdi:dns"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.ipv4info.dns", "IPv4 DNS 2", data_path=1, icon="mdi:dns"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.ipv6info.ip6addr", "IPv6 Address", data_path="ip", icon="mdi:ip"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.ipv6info.dns", "IPv6 DNS 1", data_path=0, icon="mdi:dns"),
+        BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.ipv6info.dns", "IPv6 DNS 2", data_path=1, icon="mdi:dns"),
+    ]
 
-        # IPv4 DNS
-        BaseMiWiFiSensor(client, data_cache, "net.ipv4info.dns", "IPv4 DNS 1", data_path=0, icon="mdi:dns"),
-        BaseMiWiFiSensor(client, data_cache, "net.ipv4info.dns", "IPv4 DNS 2", data_path=1, icon="mdi:dns"),
-
-        # IPv6 Address and Mask
-        BaseMiWiFiSensor(client, data_cache, "net.ipv6info.ip6addr", "IPv6 Address", data_path=0, icon="mdi:ip"),
-
-        # IPv6 DNS
-        BaseMiWiFiSensor(client, data_cache, "net.ipv6info.dns", "IPv6 DNS 1", data_path=0, icon="mdi:dns"),
-        BaseMiWiFiSensor(client, data_cache, "net.ipv6info.dns", "IPv6 DNS 2", data_path=1, icon="mdi:dns"),
+def create_newstatus_sensors(client, data_cache):
+    """Define additional sensors for the newstatus endpoint."""
+    return [
+        BaseMiWiFiSensor(client, data_cache, "newstatus", "hardware.mac", "MAC Address", icon="mdi:barcode"),
+        BaseMiWiFiSensor(client, data_cache, "newstatus", "hardware.sn", "Serial Number", icon="mdi:identifier"),
+        BaseMiWiFiSensor(client, data_cache, "newstatus", "hardware.version", "Firmware Version", icon="mdi:update"),
+        BaseMiWiFiSensor(client, data_cache, "newstatus", "hardware.imei", "IMEI", icon="mdi:cellphone"),
+        BaseMiWiFiSensor(client, data_cache, "newstatus", "2g.ssid", "SSID 2.4GHz", icon="mdi:wifi"),
+        BaseMiWiFiSensor(client, data_cache, "newstatus", "5g.ssid", "SSID 5GHz", icon="mdi:wifi"),
+        BaseMiWiFiSensor(client, data_cache, "newstatus", "2g.online_sta_count", "Online Devices 2.4GHz", icon="mdi:devices"),
+        BaseMiWiFiSensor(client, data_cache, "newstatus", "5g.online_sta_count", "Online Devices 5GHz", icon="mdi:devices"),
     ]
 
 class BaseMiWiFiSensor(SensorEntity):
     """Base class for all MiWiFi sensors."""
 
-    def __init__(self, client, data_cache, sensor_key, name, data_path=None, native_unit=None, device_class=None, icon=None, state_class=None):
+    def __init__(self, client, data_cache, endpoint, sensor_key, name, data_path=None, native_unit=None, device_class=None, icon=None, state_class=None):
+        """Initialize the sensor with endpoint flexibility."""
         self._client = client
         self._data_cache = data_cache
+        self._endpoint = endpoint  # Specifies which endpoint to use
         self._sensor_key = sensor_key
         self._name = name
         self._data_path = data_path
@@ -149,26 +171,47 @@ class BaseMiWiFiSensor(SensorEntity):
         return self._available
 
     async def async_update(self):
-        """Fetch data from the cache and update the sensor state."""
-        data = await self._data_cache.get_data()
+        """Fetch data from the specified endpoint and update the sensor state."""
+        data = await self._data_cache.get_data(self._endpoint)
+        _LOGGER.debug(f"Fetched data for endpoint '{self._endpoint}': {data}")
 
-        keys = self._sensor_key.split(".")
-        value = data
-        for key in keys:
-            value = value.get(key, {})
+        if data:
+            # Traverse nested keys in `sensor_key` to locate the specific data value
+            keys = self._sensor_key.split(".")
+            value = data
+            for key in keys:
+                if isinstance(value, dict):
+                    value = value.get(key, {})
+                else:
+                    _LOGGER.warning(f"Key '{key}' missing in data for sensor '{self._name}'")
+                    value = None
+                    break
 
-        # Prüfen, ob `value` eine Liste mit einem einzelnen Dictionary ist
-        if isinstance(value, list) and len(value) == 1 and isinstance(value[0], dict):
-            value = value[0]
+            # Process `data_path` for additional extraction, handling both dict and list cases
+            if value is not None and self._data_path is not None:
+                if isinstance(value, dict) and isinstance(self._data_path, str):
+                    value = value.get(self._data_path)
+                elif isinstance(value, list):
+                    if isinstance(self._data_path, int) and self._data_path < len(value):
+                        value = value[self._data_path]
+                    elif isinstance(self._data_path, str):
+                        # Handle lists of dicts with named fields
+                        value = [item.get(self._data_path) for item in value if isinstance(item, dict)]
+                        value = ', '.join(filter(None, value))  # Join non-None values into a string
+                else:
+                    _LOGGER.warning(f"Data path '{self._data_path}' not found for sensor '{self._name}'")
 
-        # Extrahiere den spezifischen Wert aus `data_path`, falls vorhanden
-        if self._data_path is not None:
-            if isinstance(value, dict) and isinstance(self._data_path, str):
-                # Extrahiere Wert aus Dictionary mit Schlüssel `data_path`
-                value = value.get(self._data_path)
-            elif isinstance(value, list) and isinstance(self._data_path, int) and self._data_path < len(value):
-                # Extrahiere das spezifische Listenelement basierend auf dem Index `data_path`
-                value = value[self._data_path]
+            if isinstance(value, list) and len(value) > 0:
+                if all(isinstance(item, list) for item in value):
+                    value = ', '.join(map(str, [subitem for sublist in value for subitem in sublist]))
+                else:
+                    value = value[0]
 
-        self._state = value if value is not None else None
-        self._available = value is not None
+            # Convert final value to None if it’s still a dictionary (not displayable as state)
+            if isinstance(value, dict):
+                value = None
+
+            # Update sensor state and availability
+            self._state = value if value is not None else None
+            self._available = value is not None
+            _LOGGER.debug(f"Sensor '{self._name}' updated: State = {self._state}, Available = {self._available}")

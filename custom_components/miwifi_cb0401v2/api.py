@@ -13,10 +13,10 @@ class MiWiFiClient:
         self._session = session
         self._token = None
         self.mac_address = None
-        self.firmware_version = None  # Wird nach erfolgreichem Login aus init_info gesetzt
+        self.firmware_version = None 
 
     async def login(self):
-        """Authentifiziere dich beim Router und erhalte einen Token."""
+        """Authenticate and getting token."""
         url = f"https://{self._host}/cgi-bin/luci/api/xqsystem/login"
         data = {
             "username": self._username,
@@ -40,22 +40,22 @@ class MiWiFiClient:
                         result = json.loads(text)
                     if result.get("token"):
                         self._token = result.get("token")
-                        _LOGGER.debug(f"Erhaltener Token: {self._token}")
+                        _LOGGER.debug(f"Requested Token: {self._token}")
                         await self.fetch_mac_address()
                         await self.fetch_init_info()  # Hole Firmware-Version und andere Initialdaten
                         return True
                     else:
-                        _LOGGER.error(f"Login fehlgeschlagen: {result.get('msg')}")
+                        _LOGGER.error(f"Login error: {result.get('msg')}")
                         return False
                 else:
-                    _LOGGER.error(f"Login fehlgeschlagen. Statuscode: {response.status}")
+                    _LOGGER.error(f"Login error: {response.status}")
                     return False
         except Exception as e:
-            _LOGGER.error(f"Unerwarteter Fehler beim Login: {e}")
+            _LOGGER.error(f"Unknown error while login: {e}")
             return False
 
     async def fetch_mac_address(self):
-        """Methode zum Abrufen der MAC-Adresse des Routers."""
+        """Method for requesting MAC-address."""
         url = f"https://{self._host}/cgi-bin/luci/;stok={self._token}/api/xqdtcustom/newstatus"
         headers = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
         ssl_context = False
@@ -68,31 +68,35 @@ class MiWiFiClient:
                     hardware_info = data.get("hardware")
                     if hardware_info:
                         self.mac_address = hardware_info.get("mac")
-                        _LOGGER.debug(f"MAC-Adresse erfolgreich abgerufen: {self.mac_address}")
+                        _LOGGER.debug(f"Successfully requested MAC-address: {self.mac_address}")
                     else:
-                        _LOGGER.warning("MAC-Adresse konnte nicht im Antwort-JSON gefunden werden.")
+                        _LOGGER.warning("MAC-Adresse could'nt found in the JSON answer.")
                 else:
-                    _LOGGER.error(f"Fehler beim Abrufen der MAC-Adresse. Statuscode: {response.status}")
+                    _LOGGER.error(f"Error while requesting MAC-address. Statuscode: {response.status}")
         except Exception as e:
-            _LOGGER.error(f"Unerwarteter Fehler beim Abrufen der MAC-Adresse: {e}")
+            _LOGGER.error(f"Error while requesting MAC-address: {e}")
 
     async def fetch_init_info(self):
-        """Hole Initialisierungsinformationen, wie Firmware-Version und Modell."""
+        """Getting initial informations"""
         data = await self.get_init_info()
         if data:
             self.firmware_version = data.get("romversion")
             _LOGGER.debug(f"Firmware-Version: {self.firmware_version}")
 
     async def cpe_detect(self):
-        """Führe eine CPE-Erkennung durch."""
+        """Choose cpe_detect api endpoint"""
         return await self._get_api("xqdtcustom/cpe_detect")
 
+    async def newstatus(self):
+        """Choose newstatus api endpoint"""
+        return await self._get_api("xqdtcustom/newstatus")
+
     async def get_init_info(self):
-        """Hole Initialisierungsinformationen."""
+        """Choose init_info api endpoint"""
         return await self._get_api("xqsystem/init_info")
 
     async def _get_api(self, endpoint):
-        """Hilfsmethode zum Abrufen von API-Endpunkten."""
+        """Helper for API requests"""
         if not self._token:
             _LOGGER.error("Nicht authentifiziert. Bitte zuerst einloggen.")
             return None
@@ -111,9 +115,9 @@ class MiWiFiClient:
                         result = json.loads(text)
                     return result
                 else:
-                    _LOGGER.error(f"Fehler beim Abrufen von {endpoint}. Statuscode: {response.status}")
-                    _LOGGER.debug(f"Antwortinhalt: {text}")
+                    _LOGGER.error(f"Error while request {endpoint}. Statuscode: {response.status}")
+                    _LOGGER.debug(f"Answer: {text}")
                     return None
         except Exception as e:
-            _LOGGER.error(f"Fehler beim Abrufen von {endpoint}: {e}")
+            _LOGGER.error(f"Error while request {endpoint}: {e}")
             return None
