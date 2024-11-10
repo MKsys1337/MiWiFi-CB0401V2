@@ -1,8 +1,7 @@
 # MiWiFi-CB0401V2
-![GitHub total downloads](https://img.shields.io/github/downloads/MKsys1337/MiWiFi-CB0401V2/total?style=flat-square)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/MKsys1337/MiWiFi-CB0401V2?style=flat-square)
 ![GitHub license](https://img.shields.io/github/license/MKsys1337/MiWiFi-CB0401V2.svg?style=for-the-badge)
-!(https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)
+![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/MKsys1337/MiWiFi-CB0401V2?style=for-the-badge)
 # Xiaomi 5G CPE CB0401V2 Integration for Home Assistant
 
