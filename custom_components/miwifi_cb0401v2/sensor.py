@@ -35,7 +35,7 @@ class DataCache:
                 return self._cpe_data
             elif endpoint == "newstatus":
                 if not self._newstatus_data or not self._last_update or now - self._last_update > self._refresh_interval:
-                    self._newstatus_data = await self._client._get_api("xqdtcustom/newstatus")
+                    self._newstatus_data = await self._client.newstatus()
                     self._last_update = now
                     _LOGGER.debug(f"Data from newstatus updated: {self._newstatus_data}")
                 else:
