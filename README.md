@@ -1,5 +1,9 @@
 # MiWiFi-CB0401V2
-
+![GitHub total downloads](https://img.shields.io/github/downloads/MKsys1337/MiWiFi-CB0401V2/total?style=flat-square)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/MKsys1337/MiWiFi-CB0401V2?style=flat-square)
+![GitHub license](https://img.shields.io/github/license/MKsys1337/MiWiFi-CB0401V2.svg?style=for-the-badge)
+!(https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/y/MKsys1337/MiWiFi-CB0401V2?style=for-the-badge)
 # Xiaomi 5G CPE CB0401V2 Integration for Home Assistant
 
 ## Overview
@@ -77,6 +81,9 @@ This integration uses a **Config Flow**, so no manual `configuration.yaml` chang
 - **Firmware Version**
 - **Hardware Model**
 - **Model Designation**
+- **MAC Address**
+- **Serial Number**
+- **IMEI**
 
 ### Network Information
 
@@ -94,6 +101,9 @@ This integration uses a **Config Flow**, so no manual `configuration.yaml` chang
 - **Frequency Bands**
 - **Cell ID**
 - **5G Cell ID**
+- **WiFi SSID 2.4 GHz**
+- **WiFi SSID 5 GHz**
+- **WiFi Active Clients**
 
 ## Usage
 
@@ -136,14 +146,6 @@ cd MiWiFi-CB0401V2
 ### Installing Dependencies
 
 Ensure all necessary dependencies are installed. They are defined in the `manifest.json` file.
-
-### Running Tests
-
-Run tests using:
-
-```bash
-pytest
-```
 
 ## Contributing
 
