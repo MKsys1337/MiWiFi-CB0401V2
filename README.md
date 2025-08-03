@@ -131,25 +131,6 @@ This integration uses a **Config Flow**, so no manual `configuration.yaml` chang
 6. **Save the card**:
    - Click **Save** to confirm the changes.
 
-## Development
-
-### Prerequisites
-
-- **Python 3.8 or higher**
-- **Home Assistant Core**
-- **IDE** (e.g., Visual Studio Code recommended)
-- **Git**
-
-### Cloning the Repository
-
-```bash
-git clone https://github.com/MKsys1337/MiWiFi-CB0401V2.git
-cd MiWiFi-CB0401V2
-```
-
-### Installing Dependencies
-
-Ensure all necessary dependencies are installed. They are defined in the `manifest.json` file.
 
 ## Contributing
 
