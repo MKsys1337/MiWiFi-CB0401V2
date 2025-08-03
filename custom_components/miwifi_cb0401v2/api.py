@@ -95,6 +95,14 @@ class MiWiFiClient:
         """Choose init_info api endpoint"""
         return await self._get_api("xqsystem/init_info")
 
+    async def devicelist(self):
+        """Choose devicelist api endpoint"""
+        return await self._get_api("misystem/devicelist")
+
+    async def msgbox_count(self):
+        """Choose get_msgbox_count api endpoint"""
+        return await self._get_api("xqmobile/get_msgbox_count")
+
     async def _get_api(self, endpoint):
         """Helper for API requests"""
         if not self._token:

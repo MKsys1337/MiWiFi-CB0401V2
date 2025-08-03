@@ -18,6 +18,8 @@ class DataCache:
         self._refresh_interval = refresh_interval
         self._cpe_data = None
         self._newstatus_data = None
+        self._devicelist_data = None
+        self._msgbox_count_data = None
         self._last_update = None
         self._lock = asyncio.Lock()
 
@@ -41,6 +43,22 @@ class DataCache:
                 else:
                     _LOGGER.debug("Using cached data from newstatus")
                 return self._newstatus_data
+            elif endpoint == "devicelist":
+                if not self._devicelist_data or not self._last_update or now - self._last_update > self._refresh_interval:
+                    self._devicelist_data = await self._client.devicelist()
+                    self._last_update = now
+                    _LOGGER.debug(f"Data from devicelist updated: {self._devicelist_data}")
+                else:
+                    _LOGGER.debug("Using cached data from devicelist")
+                return self._devicelist_data
+            elif endpoint == "msgbox_count":
+                if not self._msgbox_count_data or not self._last_update or now - self._last_update > self._refresh_interval:
+                    self._msgbox_count_data = await self._client.msgbox_count()
+                    self._last_update = now
+                    _LOGGER.debug(f"Data from msgbox_count updated: {self._msgbox_count_data}")
+                else:
+                    _LOGGER.debug("Using cached data from msgbox_count")
+                return self._msgbox_count_data
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     """Set up MiWiFi sensors based on a config entry."""
@@ -51,9 +69,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     sensors = (
         create_general_sensors(client, data_cache) +
         create_specific_sensors(client, data_cache) +
-        create_newstatus_sensors(client, data_cache)
+        create_newstatus_sensors(client, data_cache) +
+        create_devicelist_sensors(client, data_cache) +
+        create_msgbox_sensors(client, data_cache)
     )
     async_add_entities(sensors, True)
+
+# -----------------------------------------------------------------------------
+# Sensor factory helpers
+# -----------------------------------------------------------------------------
 
 def create_general_sensors(client, data_cache):
     """Define the list of general sensors from the cpe_detect endpoint."""
@@ -85,6 +109,18 @@ def create_specific_sensors(client, data_cache):
         BaseMiWiFiSensor(client, data_cache, "cpe_detect", "net.ipv6info.dns", "IPv6 DNS 2", data_path=1, icon="mdi:dns"),
     ]
 
+def create_devicelist_sensors(client, data_cache):
+    """Define sensors for the devicelist endpoint."""
+    return [
+        DeviceCountSensor(client, data_cache, "devicelist", "list", "Connected Devices", icon="mdi:lan-connect", state_class=SensorStateClass.MEASUREMENT)
+    ]
+
+def create_msgbox_sensors(client, data_cache):
+    """Define sensor for the SMS message box count endpoint."""
+    return [
+        BaseMiWiFiSensor(client, data_cache, "msgbox_count", "count", "SMS Messages", icon="mdi:message-text", state_class=SensorStateClass.MEASUREMENT)
+    ]
+
 def create_newstatus_sensors(client, data_cache):
     """Define additional sensors for the newstatus endpoint."""
     return [
@@ -97,6 +133,10 @@ def create_newstatus_sensors(client, data_cache):
         BaseMiWiFiSensor(client, data_cache, "newstatus", "2g.online_sta_count", "Online Devices 2.4GHz", icon="mdi:devices"),
         BaseMiWiFiSensor(client, data_cache, "newstatus", "5g.online_sta_count", "Online Devices 5GHz", icon="mdi:devices"),
     ]
+
+# -----------------------------------------------------------------------------
+# Entity classes
+# -----------------------------------------------------------------------------
 
 class BaseMiWiFiSensor(SensorEntity):
     """Base class for all MiWiFi sensors."""
@@ -215,3 +255,17 @@ class BaseMiWiFiSensor(SensorEntity):
             self._state = value if value is not None else None
             self._available = value is not None
             _LOGGER.debug(f"Sensor '{self._name}' updated: State = {self._state}, Available = {self._available}")
+
+class DeviceCountSensor(BaseMiWiFiSensor):
+    """Sensor that returns the number of connected devices from the devicelist endpoint."""
+
+    async def async_update(self):
+        data = await self._data_cache.get_data(self._endpoint)
+        _LOGGER.debug(f"Fetched data for DeviceCountSensor: {data}")
+
+        if data and isinstance(data.get(self._sensor_key), list):
+            self._state = len(data.get(self._sensor_key))
+            self._available = True
+        else:
+            self._state = None
+            self._available = False
