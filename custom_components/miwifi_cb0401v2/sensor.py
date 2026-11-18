@@ -220,8 +220,11 @@ class BaseMiWiFiSensor(SensorEntity):
                 if isinstance(value, dict) and isinstance(self._data_path, str):
                     value = value.get(self._data_path)
                 elif isinstance(value, list):
-                    if isinstance(self._data_path, int) and self._data_path < len(value):
-                        value = value[self._data_path]
+                    if isinstance(self._data_path, int):
+                        if 0 <= self._data_path < len(value):
+                            value = value[self._data_path]
+                        else:
+                            value = None
                     elif isinstance(self._data_path, str):
                         # Handle lists of dicts with named fields
                         value = [item.get(self._data_path) for item in value if isinstance(item, dict)]
@@ -244,6 +247,9 @@ class BaseMiWiFiSensor(SensorEntity):
             self._state = value if value is not None else None
             self._available = value is not None
             _LOGGER.debug(f"Sensor '{self._name}' updated: State = {self._state}, Available = {self._available}")
+        else:
+            self._state = None
+            self._available = False
 
 class DeviceCountSensor(BaseMiWiFiSensor):
     """Sensor that returns the number of connected devices from the devicelist endpoint."""
