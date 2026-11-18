@@ -14,9 +14,19 @@ class MiWiFiClient:
         self._token = None
         self.mac_address = None
         self.firmware_version = None 
+        self._in_login = False
 
     async def login(self):
         """Authenticate and getting token."""
+        if self._in_login:
+            return False
+        self._in_login = True
+        try:
+            return await self._login()
+        finally:
+            self._in_login = False
+
+    async def _login(self):
         url = f"https://{self._host}/cgi-bin/luci/api/xqsystem/login"
         data = {
             "username": self._username,
@@ -40,7 +50,7 @@ class MiWiFiClient:
                         result = json.loads(text)
                     if result.get("token"):
                         self._token = result.get("token")
-                        _LOGGER.debug(f"Requested Token: {self._token}")
+                        _LOGGER.debug("Login successful, token received")
                         await self.fetch_mac_address()
                         await self.fetch_init_info()  # Hole Firmware-Version und andere Initialdaten
                         return True
@@ -103,11 +113,17 @@ class MiWiFiClient:
         """Choose get_msgbox_count api endpoint"""
         return await self._get_api("xqmobile/get_msgbox_count")
 
-    async def _get_api(self, endpoint):
-        """Helper for API requests"""
+    async def _get_api(self, endpoint, _retry=True):
+        """Helper for API requests.
+
+        The router invalidates the stok token after some time (or after a
+        router reboot). On an "Invalid token" answer (HTTP 401 or JSON
+        code 401) log in again once and repeat the request.
+        """
         if not self._token:
-            _LOGGER.error("Nicht authentifiziert. Bitte zuerst einloggen.")
-            return None
+            if not _retry or not await self.login():
+                _LOGGER.error("Not authenticated, login failed.")
+                return None
 
         url = f"https://{self._host}/cgi-bin/luci/;stok={self._token}/api/{endpoint}"
         headers = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
@@ -116,11 +132,21 @@ class MiWiFiClient:
         try:
             async with self._session.get(url, headers=headers, ssl=ssl_context) as response:
                 text = await response.text()
-                if response.status == 200:
+                result = None
+                if response.status in (200, 401):
                     try:
-                        result = await response.json()
-                    except aiohttp.ContentTypeError:
                         result = json.loads(text)
+                    except ValueError:
+                        result = None
+                if response.status == 401 or (isinstance(result, dict) and result.get("code") == 401):
+                    if _retry:
+                        _LOGGER.debug("Token expired while requesting %s, logging in again", endpoint)
+                        self._token = None
+                        if await self.login():
+                            return await self._get_api(endpoint, _retry=False)
+                    _LOGGER.error("Token rejected while requesting %s", endpoint)
+                    return None
+                if response.status == 200 and result is not None:
                     return result
                 else:
                     _LOGGER.error(f"Error while request {endpoint}. Statuscode: {response.status}")
