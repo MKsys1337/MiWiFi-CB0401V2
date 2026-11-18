@@ -2,8 +2,14 @@ import aiohttp
 import json
 import ssl
 import logging
+import time
 
 _LOGGER = logging.getLogger(__name__)
+
+# After a failed login, do not try again for this many seconds. Several
+# sensors share one client; without a cooldown every sensor update would
+# start its own (failing) login attempt.
+LOGIN_RETRY_COOLDOWN = 60
 
 class MiWiFiClient:
     def __init__(self, host, username, password, session):
@@ -14,9 +20,27 @@ class MiWiFiClient:
         self._token = None
         self.mac_address = None
         self.firmware_version = None 
+        self._in_login = False
+        self._login_blocked_until = 0.0
 
     async def login(self):
         """Authenticate and getting token."""
+        if self._in_login:
+            return False
+        if time.monotonic() < self._login_blocked_until:
+            _LOGGER.debug("Skipping login, last attempt failed less than %ss ago", LOGIN_RETRY_COOLDOWN)
+            return False
+        self._in_login = True
+        try:
+            ok = await self._login()
+        finally:
+            self._in_login = False
+        if not ok:
+            self._token = None
+            self._login_blocked_until = time.monotonic() + LOGIN_RETRY_COOLDOWN
+        return ok
+
+    async def _login(self):
         url = f"https://{self._host}/cgi-bin/luci/api/xqsystem/login"
         data = {
             "username": self._username,
@@ -40,10 +64,12 @@ class MiWiFiClient:
                         result = json.loads(text)
                     if result.get("token"):
                         self._token = result.get("token")
-                        _LOGGER.debug(f"Requested Token: {self._token}")
+                        _LOGGER.debug("Login successful, token received")
                         await self.fetch_mac_address()
                         await self.fetch_init_info()  # Hole Firmware-Version und andere Initialdaten
-                        return True
+                        # The router may have rejected the fresh token while
+                        # fetching the initial data (_get_api clears it then).
+                        return self._token is not None
                     else:
                         _LOGGER.error(f"Login error: {result.get('msg')}")
                         return False
@@ -103,11 +129,17 @@ class MiWiFiClient:
         """Choose get_msgbox_count api endpoint"""
         return await self._get_api("xqmobile/get_msgbox_count")
 
-    async def _get_api(self, endpoint):
-        """Helper for API requests"""
+    async def _get_api(self, endpoint, _retry=True):
+        """Helper for API requests.
+
+        The router invalidates the stok token after some time (or after a
+        router reboot). On an "Invalid token" answer (HTTP 401 or JSON
+        code 401) log in again once and repeat the request.
+        """
         if not self._token:
-            _LOGGER.error("Nicht authentifiziert. Bitte zuerst einloggen.")
-            return None
+            if not _retry or not await self.login():
+                _LOGGER.debug("Not authenticated, skipping %s", endpoint)  # the login failure itself is logged once
+                return None
 
         url = f"https://{self._host}/cgi-bin/luci/;stok={self._token}/api/{endpoint}"
         headers = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
@@ -116,11 +148,25 @@ class MiWiFiClient:
         try:
             async with self._session.get(url, headers=headers, ssl=ssl_context) as response:
                 text = await response.text()
-                if response.status == 200:
+                result = None
+                if response.status in (200, 401):
                     try:
-                        result = await response.json()
-                    except aiohttp.ContentTypeError:
                         result = json.loads(text)
+                    except ValueError:
+                        result = None
+                if response.status == 401 or (isinstance(result, dict) and result.get("code") == 401):
+                    self._token = None
+                    if _retry:
+                        _LOGGER.debug("Token expired while requesting %s, logging in again", endpoint)
+                        if await self.login():
+                            return await self._get_api(endpoint, _retry=False)
+                    else:
+                        # The fresh token was rejected as well. Do not log in
+                        # again on every poll, wait for the cooldown instead.
+                        self._login_blocked_until = time.monotonic() + LOGIN_RETRY_COOLDOWN
+                    _LOGGER.error("Token rejected while requesting %s", endpoint)
+                    return None
+                if response.status == 200 and result is not None:
                     return result
                 else:
                     _LOGGER.error(f"Error while request {endpoint}. Statuscode: {response.status}")

@@ -11,54 +11,42 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 class DataCache:
-    """Cache for data from different API endpoints."""
+    """Cache for data from different API endpoints.
+
+    Each endpoint has its own timestamp, so refreshing one endpoint does not
+    keep the others stale.
+    """
+
+    _FETCHERS = {
+        "cpe_detect": "cpe_detect",
+        "newstatus": "newstatus",
+        "devicelist": "devicelist",
+        "msgbox_count": "msgbox_count",
+    }
 
     def __init__(self, client, refresh_interval=timedelta(minutes=1)):
         self._client = client
         self._refresh_interval = refresh_interval
-        self._cpe_data = None
-        self._newstatus_data = None
-        self._devicelist_data = None
-        self._msgbox_count_data = None
-        self._last_update = None
+        self._data = {}
+        self._last_update = {}
         self._lock = asyncio.Lock()
 
     async def get_data(self, endpoint):
         """Get cached data for a specified endpoint or update if needed."""
+        fetcher = self._FETCHERS.get(endpoint)
+        if fetcher is None:
+            _LOGGER.error("Unknown endpoint '%s'", endpoint)
+            return None
         async with self._lock:
             now = datetime.now()
-            if endpoint == "cpe_detect":
-                if not self._cpe_data or not self._last_update or now - self._last_update > self._refresh_interval:
-                    self._cpe_data = await self._client.cpe_detect()
-                    self._last_update = now
-                    _LOGGER.debug(f"Data from cpe_detect updated: {self._cpe_data}")
-                else:
-                    _LOGGER.debug("Using cached data from cpe_detect")
-                return self._cpe_data
-            elif endpoint == "newstatus":
-                if not self._newstatus_data or not self._last_update or now - self._last_update > self._refresh_interval:
-                    self._newstatus_data = await self._client.newstatus()
-                    self._last_update = now
-                    _LOGGER.debug(f"Data from newstatus updated: {self._newstatus_data}")
-                else:
-                    _LOGGER.debug("Using cached data from newstatus")
-                return self._newstatus_data
-            elif endpoint == "devicelist":
-                if not self._devicelist_data or not self._last_update or now - self._last_update > self._refresh_interval:
-                    self._devicelist_data = await self._client.devicelist()
-                    self._last_update = now
-                    _LOGGER.debug(f"Data from devicelist updated: {self._devicelist_data}")
-                else:
-                    _LOGGER.debug("Using cached data from devicelist")
-                return self._devicelist_data
-            elif endpoint == "msgbox_count":
-                if not self._msgbox_count_data or not self._last_update or now - self._last_update > self._refresh_interval:
-                    self._msgbox_count_data = await self._client.msgbox_count()
-                    self._last_update = now
-                    _LOGGER.debug(f"Data from msgbox_count updated: {self._msgbox_count_data}")
-                else:
-                    _LOGGER.debug("Using cached data from msgbox_count")
-                return self._msgbox_count_data
+            last = self._last_update.get(endpoint)
+            if self._data.get(endpoint) is None or last is None or now - last > self._refresh_interval:
+                self._data[endpoint] = await getattr(self._client, fetcher)()
+                self._last_update[endpoint] = now
+                _LOGGER.debug("Data from %s updated", endpoint)
+            else:
+                _LOGGER.debug("Using cached data from %s", endpoint)
+            return self._data[endpoint]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     """Set up MiWiFi sensors based on a config entry."""
@@ -239,7 +227,8 @@ class BaseMiWiFiSensor(SensorEntity):
                         value = [item.get(self._data_path) for item in value if isinstance(item, dict)]
                         value = ', '.join(filter(None, value))  # Join non-None values into a string
                 else:
-                    _LOGGER.warning(f"Data path '{self._data_path}' not found for sensor '{self._name}'")
+                    # e.g. no IPv6 DNS server assigned: not an error, the sensor is just unavailable
+                    _LOGGER.debug(f"Data path '{self._data_path}' not found for sensor '{self._name}'")
 
             if isinstance(value, list) and len(value) > 0:
                 if all(isinstance(item, list) for item in value):
