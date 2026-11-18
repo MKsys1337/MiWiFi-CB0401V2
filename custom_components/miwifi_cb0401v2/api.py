@@ -2,8 +2,14 @@ import aiohttp
 import json
 import ssl
 import logging
+import time
 
 _LOGGER = logging.getLogger(__name__)
+
+# After a failed login, do not try again for this many seconds. Several
+# sensors share one client; without a cooldown every sensor update would
+# start its own (failing) login attempt.
+LOGIN_RETRY_COOLDOWN = 60
 
 class MiWiFiClient:
     def __init__(self, host, username, password, session):
@@ -15,16 +21,24 @@ class MiWiFiClient:
         self.mac_address = None
         self.firmware_version = None 
         self._in_login = False
+        self._login_blocked_until = 0.0
 
     async def login(self):
         """Authenticate and getting token."""
         if self._in_login:
             return False
+        if time.monotonic() < self._login_blocked_until:
+            _LOGGER.debug("Skipping login, last attempt failed less than %ss ago", LOGIN_RETRY_COOLDOWN)
+            return False
         self._in_login = True
         try:
-            return await self._login()
+            ok = await self._login()
         finally:
             self._in_login = False
+        if not ok:
+            self._token = None
+            self._login_blocked_until = time.monotonic() + LOGIN_RETRY_COOLDOWN
+        return ok
 
     async def _login(self):
         url = f"https://{self._host}/cgi-bin/luci/api/xqsystem/login"
@@ -53,7 +67,9 @@ class MiWiFiClient:
                         _LOGGER.debug("Login successful, token received")
                         await self.fetch_mac_address()
                         await self.fetch_init_info()  # Hole Firmware-Version und andere Initialdaten
-                        return True
+                        # The router may have rejected the fresh token while
+                        # fetching the initial data (_get_api clears it then).
+                        return self._token is not None
                     else:
                         _LOGGER.error(f"Login error: {result.get('msg')}")
                         return False
@@ -122,7 +138,7 @@ class MiWiFiClient:
         """
         if not self._token:
             if not _retry or not await self.login():
-                _LOGGER.error("Not authenticated, login failed.")
+                _LOGGER.debug("Not authenticated, skipping %s", endpoint)  # the login failure itself is logged once
                 return None
 
         url = f"https://{self._host}/cgi-bin/luci/;stok={self._token}/api/{endpoint}"
