@@ -155,11 +155,15 @@ class MiWiFiClient:
                     except ValueError:
                         result = None
                 if response.status == 401 or (isinstance(result, dict) and result.get("code") == 401):
+                    self._token = None
                     if _retry:
                         _LOGGER.debug("Token expired while requesting %s, logging in again", endpoint)
-                        self._token = None
                         if await self.login():
                             return await self._get_api(endpoint, _retry=False)
+                    else:
+                        # The fresh token was rejected as well. Do not log in
+                        # again on every poll, wait for the cooldown instead.
+                        self._login_blocked_until = time.monotonic() + LOGIN_RETRY_COOLDOWN
                     _LOGGER.error("Token rejected while requesting %s", endpoint)
                     return None
                 if response.status == 200 and result is not None:
